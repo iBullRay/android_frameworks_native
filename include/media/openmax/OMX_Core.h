@@ -267,6 +267,8 @@ typedef enum OMX_ERRORTYPE
 
   /** Tunneling is unsupported by the component*/
   OMX_ErrorTunnelingUnsupported = (OMX_S32) 0x80001024,
+  
+  OMX_ErrorallocateBuffersFailed = (OMX_S32) 0x80001025,
 
   OMX_ErrorKhronosExtensions = (OMX_S32)0x8F000000, /**< Reserved region for introducing Khronos Standard Extensions */ 
   OMX_ErrorVendorStartUnused = (OMX_S32)0x90000000, /**< Reserved region for introducing Vendor Extensions */

@@ -145,6 +145,7 @@ public:
         virtual void setDefaultState() = 0;
         virtual void setSkip(bool skip) = 0;
         virtual void setBlending(uint32_t blending) = 0;
+        virtual void setAlpha(uint32_t alpha) = 0;
         virtual void setTransform(uint32_t transform) = 0;
         virtual void setFrame(const Rect& frame) = 0;
         virtual void setCrop(const Rect& crop) = 0;

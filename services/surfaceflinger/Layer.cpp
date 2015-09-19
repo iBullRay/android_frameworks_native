@@ -266,10 +266,15 @@ void Layer::setGeometry(
     // enable this layer
     layer.setSkip(false);
 
+	// hwc HAL should determine if it will do alpha-fade
+	layer.setAlpha(s.alpha);
+	
     // we can't do alpha-fade with the hwc HAL
     const State& s(drawingState());
     if (s.alpha < 0xFF) {
-        layer.setSkip(true);
+        layer.setBlending(mPremultipliedAlpha ?
+                HWC_BLENDING_PREMULT :
+                HWC_BLENDING_COVERAGE);
     }
 
     if (isSecure() && !hw->isSecure()) {

@@ -631,6 +631,13 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 
 status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo* info) {
     int32_t type = BAD_VALUE;
+	int mHwRotation = 0; 
+    int mDefaultRotation = 0;
+    char property[PROPERTY_VALUE_MAX];   
+    property_get("ro.sf.hwrotation", property, "0");
+    mHwRotation = atoi(property) / 90;
+    property_get("ro.sf.default_rotation", property, "0");
+    mDefaultRotation = atoi(property);    
     for (int i=0 ; i<DisplayDevice::NUM_DISPLAY_TYPES ; i++) {
         if (display == mDefaultDisplays[i]) {
             type = i;
@@ -1224,6 +1231,10 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                         sp<DisplayDevice> hw = new DisplayDevice(this,
                                 state.type, isSecure, display, stc, fbs,
                                 mEGLConfig);
+						if (fbs == NULL) {
+                            sp<ANativeWindow> native = stc;
+                            native_window_set_buffers_format(native.get(), PIXEL_FORMAT_BGRA_8888);                       
+                        }
                         hw->setLayerStack(state.layerStack);
                         hw->setProjection(state.orientation,
                                 state.viewport, state.frame);
@@ -1651,13 +1662,15 @@ void SurfaceFlinger::doComposeSurfaces(const sp<const DisplayDevice>& hw, const 
             layer->setAcquireFence(hw, *cur);
         }
     } else {
-        // we're not using h/w composer
-        for (size_t i=0 ; i<count ; ++i) {
-            const sp<LayerBase>& layer(layers[i]);
-            const Region clip(dirty.intersect(
+        if (hwc.initCheck() || hw->getDisplayType() < DisplayDevice::DISPLAY_VIRTUAL) {
+            // we're not using h/w composer
+            for (size_t i=0 ; i<count ; ++i) {
+                const sp<LayerBase>& layer(layers[i]);
+                const Region clip(dirty.intersect(
                     tr.transform(layer->visibleRegion)));
-            if (!clip.isEmpty()) {
-                layer->draw(hw, clip);
+                if (!clip.isEmpty()) {
+                    layer->draw(hw, clip);
+                }
             }
         }
     }
@@ -2084,6 +2097,17 @@ status_t SurfaceFlinger::onLayerDestroyed(const wp<LayerBaseClient>& layer)
 // ---------------------------------------------------------------------------
 
 void SurfaceFlinger::onInitializeDisplays() {
+    char value[PROPERTY_VALUE_MAX];   
+    int mDefaultRotation = 0;
+    int mHwRotation = 0;    
+    sp<const DisplayDevice> hw(getDefaultDisplayDevice());
+    const uint32_t hw_w = hw->getWidth();
+    const uint32_t hw_h = hw->getHeight();  
+    
+    property_get("ro.sf.default_rotation", value, "0");
+    mDefaultRotation = atoi(value);    
+    property_get("ro.sf.hwrotation", value, "0");
+    mHwRotation = atoi(value) / 90;
     // reset screen orientation
     Vector<ComposerState> state;
     Vector<DisplayState> displays;
@@ -2093,6 +2117,17 @@ void SurfaceFlinger::onInitializeDisplays() {
     d.orientation = DisplayState::eOrientationDefault;
     d.frame.makeInvalid();
     d.viewport.makeInvalid();
+	if ((d.orientation & DisplayState::eOrientation90) != DisplayState::eOrientationDefault) { 	
+	    d.frame.right = hw_w;	    
+	    d.frame.bottom = hw_h; 	   
+	    d.viewport.right = hw_w;	   
+	    d.viewport.bottom = hw_h;    
+  	} else {
+	    d.frame.right = hw_h;
+	    d.frame.bottom = hw_w;    
+	    d.viewport.right = hw_h;
+	    d.viewport.bottom = hw_w;  
+  	}
     displays.add(d);
     setTransactionState(state, displays, 0);
     onScreenAcquired(getDefaultDisplayDevice());
