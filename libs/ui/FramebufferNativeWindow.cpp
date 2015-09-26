@@ -72,6 +72,13 @@ private:
  * 
  */
 
+ANativeWindowBuffer* FramebufferNativeWindow::getCurrentBufferAddress()
+{
+    ANativeWindowBuffer* buf;		
+    buf = buffers[mCurrentBufferIndex].get();	
+    return buf;
+}
+
 FramebufferNativeWindow::FramebufferNativeWindow() 
     : BASE(), fbDev(0), grDev(0), mUpdateOnDemand(false)
 {

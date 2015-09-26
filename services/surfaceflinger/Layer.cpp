@@ -265,9 +265,6 @@ void Layer::setGeometry(
 
     // enable this layer
     layer.setSkip(false);
-
-	// hwc HAL should determine if it will do alpha-fade
-	layer.setAlpha(s.alpha);
 	
     // we can't do alpha-fade with the hwc HAL
     const State& s(drawingState());
@@ -280,6 +277,9 @@ void Layer::setGeometry(
     if (isSecure() && !hw->isSecure()) {
         layer.setSkip(true);
     }
+
+    // hwc HAL should determine if it will do alpha-fade
+    layer.setAlpha(s.alpha);
 
     /*
      * Transformations are applied in this order:
