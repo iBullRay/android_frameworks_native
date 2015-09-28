@@ -631,7 +631,7 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 
 status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo* info) {
     int32_t type = BAD_VALUE;
-	int mHwRotation = 0; 
+    int mHwRotation = 0; 
     int mDefaultRotation = 0;
     char property[PROPERTY_VALUE_MAX];   
     property_get("ro.sf.hwrotation", property, "0");
@@ -1231,7 +1231,7 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
                         sp<DisplayDevice> hw = new DisplayDevice(this,
                                 state.type, isSecure, display, stc, fbs,
                                 mEGLConfig);
-						if (fbs == NULL) {
+                        if (fbs == NULL) {
                             sp<ANativeWindow> native = stc;
                             native_window_set_buffers_format(native.get(), PIXEL_FORMAT_BGRA_8888);                       
                         }
@@ -2117,17 +2117,17 @@ void SurfaceFlinger::onInitializeDisplays() {
     d.orientation = DisplayState::eOrientationDefault;
     d.frame.makeInvalid();
     d.viewport.makeInvalid();
-	if ((d.orientation & DisplayState::eOrientation90) != DisplayState::eOrientationDefault) { 	
-	    d.frame.right = hw_w;	    
-	    d.frame.bottom = hw_h; 	   
-	    d.viewport.right = hw_w;	   
-	    d.viewport.bottom = hw_h;    
-  	} else {
-	    d.frame.right = hw_h;
-	    d.frame.bottom = hw_w;    
-	    d.viewport.right = hw_h;
-	    d.viewport.bottom = hw_w;  
-  	}
+    if ((d.orientation & DisplayState::eOrientation90) != DisplayState::eOrientationDefault) { 	
+        d.frame.right = hw_w;	    
+        d.frame.bottom = hw_h; 	   
+        d.viewport.right = hw_w;	   
+        d.viewport.bottom = hw_h;    
+    } else {
+        d.frame.right = hw_h;
+        d.frame.bottom = hw_w;    
+        d.viewport.right = hw_h;
+        d.viewport.bottom = hw_w;  
+    }
     displays.add(d);
     setTransactionState(state, displays, 0);
     onScreenAcquired(getDefaultDisplayDevice());
