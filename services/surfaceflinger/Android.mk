@@ -44,15 +44,16 @@ ifneq ($(NUM_FRAMEBUFFER_SURFACE_BUFFERS),)
 endif
 
 LOCAL_SHARED_LIBRARIES := \
-	libcutils \
-	libdl \
-	libhardware \
-	libutils \
-	libEGL \
-	libGLESv1_CM \
-	libbinder \
-	libui \
-	libgui
+    libcutils \
+    libdl \
+    libhardware \
+    libutils \
+    libEGL \
+    libGLESv1_CM \
+    libbinder \
+    libui \
+    libgui \
+    libsync
 
 ifeq ($(BOARD_USES_SAMSUNG_HDMI),true)
         LOCAL_CFLAGS += -DSAMSUNG_HDMI_SUPPORT

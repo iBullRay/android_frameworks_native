@@ -69,6 +69,9 @@ public:
     // for debugging only
     int getCurrentBufferIndex() const;
 
+    // for or gpu autotest
+    ANativeWindowBuffer* getCurrentBufferAddress();
+
 private:
     friend class LightRefBase<FramebufferNativeWindow>;    
     ~FramebufferNativeWindow(); // this class cannot be overloaded

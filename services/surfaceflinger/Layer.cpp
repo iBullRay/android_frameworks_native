@@ -278,9 +278,6 @@ void Layer::setGeometry(
         layer.setSkip(true);
     }
 
-    // hwc HAL should determine if it will do alpha-fade
-    layer.setAlpha(s.alpha);
-
     /*
      * Transformations are applied in this order:
      * 1) buffer orientation/flip/mirror
