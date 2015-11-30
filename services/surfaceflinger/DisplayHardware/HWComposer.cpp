@@ -240,8 +240,8 @@ HWComposer::HWComposer(
         // close FB HAL if we don't needed it.
         // FIXME: this is temporary until we're not forced to open FB HAL
         // before HWC.
-        framebuffer_close(mFbDev);
-        mFbDev = NULL;
+        //framebuffer_close(mFbDev);
+        //mFbDev = NULL;
     }
 
     // If we have no HWC, or a pre-1.1 HWC, an FB dev is mandatory.
@@ -284,24 +284,26 @@ HWComposer::HWComposer(
         }
 
         // don't need a vsync thread if we have a hardware composer
-        needVSyncThread = false;
-        // always turn vsync off when we start
-        if (hwcHasVsyncEvent(mHwc)) {
-            eventControl(HWC_DISPLAY_PRIMARY, HWC_EVENT_VSYNC, 0);
-
-            // the number of displays we actually have depends on the
-            // hw composer version
-            if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_2)) {
-                // 1.2 adds support for virtual displays
-                mNumDisplays = MAX_DISPLAYS;
-            } else if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1)) {
-                // 1.1 adds support for multiple displays
-                mNumDisplays = HWC_NUM_DISPLAY_TYPES;
-            } else {
-                mNumDisplays = 1;
-            }
+        property_get("ro.config.used_hw_vsync", value, "0");
+        mHw_vsync = atoi(value);
+        if (mHw_vsync) {
+            needVSyncThread = false;
         } else {
             needVSyncThread = true;
+        }
+
+        // always turn vsync off when we start
+        eventControl(HWC_DISPLAY_PRIMARY, HWC_EVENT_VSYNC, 0);
+
+        // the number of displays we actually have depends on the
+        // hw composer version
+        if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_2)) {
+            // 1.2 adds support for virtual displays
+            mNumDisplays = MAX_DISPLAYS;
+        } else if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1)) {
+            // 1.1 adds support for multiple displays
+            mNumDisplays = HWC_NUM_DISPLAY_TYPES;
+        } else {
             mNumDisplays = 1;
         }
     }
@@ -947,13 +949,6 @@ int HWComposer::fbPost(int32_t id,
 
         int srcOri;
         switch (primary_hw->getOrientation()) {
-            case 0:
-                default:
-                    srcOri = 0;
-                    sRect.left = sRect.top = 0;
-                    sRect.right = handle->width;
-                    sRect.bottom = handle->height;
-                    break;
             case 1:
                 srcOri = HAL_TRANSFORM_ROT_90; 
                 sRect.left = sRect.top = 0;
@@ -972,6 +967,13 @@ int HWComposer::fbPost(int32_t id,
 	            sRect.right = handle->height;
 	            sRect.bottom = handle->width;
 	            break;
+            case 0:
+                default:
+                    srcOri = 0;
+                    sRect.left = sRect.top = 0;
+                    sRect.right = handle->width;
+                    sRect.bottom = handle->height;
+                    break;
         }
         sCrop.left = sCrop.top = 0;
         sCrop.right = handle->width;
@@ -1022,9 +1024,9 @@ int HWComposer::fbPost(int32_t id,
                     dCrop.right = dCrop.left + w;
                     dCrop.bottom = dCrop.top + h;			
 
-                    if (dCrop.right != vhandle->Crop.right 	||
-	                    dCrop.bottom != vhandle->Crop.bottom||
-	                    dCrop.left != vhandle->Crop.left 	||
+                    if (dCrop.right != vhandle->Crop.right ||
+	                    dCrop.bottom != vhandle->Crop.bottom ||
+	                    dCrop.left != vhandle->Crop.left ||
 	                    dCrop.top != vhandle->Crop.top) {
 	                    vhandle->Crop.left = dCrop.left;
 	                    vhandle->Crop.top = dCrop.top;

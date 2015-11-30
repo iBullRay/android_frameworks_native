@@ -138,8 +138,8 @@ public:
     // TODO: this should be made accessible only to HWComposer
     const Vector< sp<LayerBase> >& getLayerSortedByZForHwcDisplay(int disp);
 
-	// vector for h/w display
-	const DefaultKeyedVector< wp<IBinder>, sp<DisplayDevice> > & getDisplays() { return mDisplays; }
+    // vector for h/w display
+    const DefaultKeyedVector< wp<IBinder>, sp<DisplayDevice> > & getDisplays() { return mDisplays; }
 
 private:
     friend class Client;

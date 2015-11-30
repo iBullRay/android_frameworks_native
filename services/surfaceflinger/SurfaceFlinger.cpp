@@ -631,7 +631,7 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 
 status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo* info) {
     int32_t type = BAD_VALUE;
-    int mHwRotation = 0; 
+    int mHwRotation = 0;
     int mDefaultRotation = 0;
     char property[PROPERTY_VALUE_MAX];   
     property_get("ro.sf.hwrotation", property, "0");
@@ -701,21 +701,16 @@ status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo*
         info->orientation = 0;
     }
 
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.sf.hwrotation", value, "0");
-    int additionalRot = atoi(value) / 90;
-    if ((type == DisplayDevice::DISPLAY_PRIMARY) && (additionalRot & DisplayState::eOrientationSwapMask)) {
-        info->h = hwc.getWidth(type);
-        info->w = hwc.getHeight(type);
-        info->xdpi = ydpi;
-        info->ydpi = xdpi;
-    }
-    else {
+    if (((mHwRotation + mDefaultRotation) & 0x01) == 0) {
         info->w = hwc.getWidth(type);
         info->h = hwc.getHeight(type);
-        info->xdpi = xdpi;
-        info->ydpi = ydpi;
+    } else {
+        info->w = hwc.getHeight(type);
+        info->h = hwc.getWidth(type);
     }
+
+    info->xdpi = xdpi;
+    info->ydpi = ydpi;
     info->fps = float(1e9 / hwc.getRefreshPeriod(type));
 
     // All non-virtual displays are currently considered secure.
@@ -2114,7 +2109,7 @@ void SurfaceFlinger::onInitializeDisplays() {
     DisplayState d;
     d.what = DisplayState::eDisplayProjectionChanged;
     d.token = mDefaultDisplays[DisplayDevice::DISPLAY_PRIMARY];
-    d.orientation = DisplayState::eOrientationDefault;
+    d.orientation = (mHwRotation + mDefaultRotation) % 4;
     d.frame.makeInvalid();
     d.viewport.makeInvalid();
     if ((d.orientation & DisplayState::eOrientation90) != DisplayState::eOrientationDefault) { 	
