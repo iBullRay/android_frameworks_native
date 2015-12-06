@@ -229,8 +229,6 @@ HWComposer::HWComposer(
     mDebugForceFakeVSync = atoi(value);
 
     bool needVSyncThread = true;
-	
-    int mHw_vsync = 0;
 
     // Note: some devices may insist that the FB HAL be opened before HWC.
     loadFbHalModule();
@@ -284,27 +282,24 @@ HWComposer::HWComposer(
         }
 
         // don't need a vsync thread if we have a hardware composer
-        property_get("ro.config.used_hw_vsync", value, "0");
-        mHw_vsync = atoi(value);
-        if (mHw_vsync) {
-            needVSyncThread = false;
-        } else {
-            needVSyncThread = true;
-        }
+        needVSyncThread = false;
 
         // always turn vsync off when we start
-        eventControl(HWC_DISPLAY_PRIMARY, HWC_EVENT_VSYNC, 0);
+        if (hwcHasVsyncEvent(mHwc)) {
+            eventControl(HWC_DISPLAY_PRIMARY, HWC_EVENT_VSYNC, 0);
 
-        // the number of displays we actually have depends on the
-        // hw composer version
-        if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_2)) {
-            // 1.2 adds support for virtual displays
-            mNumDisplays = MAX_DISPLAYS;
-        } else if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1)) {
-            // 1.1 adds support for multiple displays
-            mNumDisplays = HWC_NUM_DISPLAY_TYPES;
-        } else {
-            mNumDisplays = 1;
+            // the number of displays we actually have depends on the
+            // hw composer version
+            if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_2)) {
+                // 1.2 adds support for virtual displays
+                mNumDisplays = MAX_DISPLAYS;
+            } else if (hwcHasApiVersion(mHwc, HWC_DEVICE_API_VERSION_1_1)) {
+                // 1.1 adds support for multiple displays
+                mNumDisplays = HWC_NUM_DISPLAY_TYPES;
+            } else {
+                needVSyncThread = true;
+                mNumDisplays = 1;
+            }
         }
     }
 
@@ -917,7 +912,7 @@ int HWComposer::fbPost(int32_t id,
 				acquireFence->waitForever(1000, "HWComposer::fbPost");
 	        }
 	        if (mHwc && mHwc->fbPrePost) {
-                err = mHwc->fbPrePost(mHwc,buffer->handle);
+                err = mHwc->fbPrePost(mHwc, buffer->handle);
                 if (err) {
                     ALOGE("mHwc fbPrePost failed (%s)", strerror(-err));
                     return err;
@@ -931,7 +926,7 @@ int HWComposer::fbPost(int32_t id,
             acquireFence->waitForever(1000, "HWComposer::fbPost");
         }
         if (mHwc && mHwc->fbPrePost) {
-            err = mHwc->fbPrePost(mHwc,buffer->handle);
+            err = mHwc->fbPrePost(mHwc, buffer->handle);
             if (err) {
                 ALOGE("mHwc fbPrePost failed (%s)", strerror(-err));
                 return err;
@@ -944,7 +939,7 @@ int HWComposer::fbPost(int32_t id,
         sp<const DisplayDevice> primary_hw(mFlinger->getDefaultDisplayDevice());
         if (primary_hw == 0) return -EINVAL;
         hwc_rect_t sRect, sCrop;
-        private_handle_t *  handle;
+        private_handle_t*  handle;
         handle = (private_handle_t*)(buffer->handle);
 
         int srcOri;
@@ -983,9 +978,9 @@ int HWComposer::fbPost(int32_t id,
             sp<DisplayDevice> hw((mFlinger->getDisplays())[dpy]);
             int32_t type = hw->getDisplayType();
             if (type >= DisplayDevice::DISPLAY_VIRTUAL) {
-                ANativeWindow * window = hw->getNativeWindow();
+                ANativeWindow* window = hw->getNativeWindow();
                 int fenceFd = -1;	
-                ANativeWindowBuffer * vBuffer = NULL;
+                ANativeWindowBuffer* vBuffer = NULL;
                 int rel = window->dequeueBuffer(window, &vBuffer, &fenceFd);
                 if (rel < 0) {
                     ALOGE("%s(%d): Dequeue native buffer failed", __FUNCTION__, __LINE__);
@@ -1037,9 +1032,8 @@ int HWComposer::fbPost(int32_t id,
 
                     err = mHwc->stretchBlit(mHwc, vhandle, handle, &dCrop, &sCrop, srcOri);	
                     window->queueBuffer(window, vBuffer, -1);
-                }
-                else {
-                    ALOGE("Native framer is null");
+                } else {
+                    ALOGE("dequeue NULL native buffer");
                 }
             }
         }

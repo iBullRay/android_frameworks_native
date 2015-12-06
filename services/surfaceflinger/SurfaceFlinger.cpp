@@ -633,11 +633,12 @@ status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo*
     int32_t type = BAD_VALUE;
     int mHwRotation = 0;
     int mDefaultRotation = 0;
-    char property[PROPERTY_VALUE_MAX];   
+    char property[PROPERTY_VALUE_MAX];
     property_get("ro.sf.hwrotation", property, "0");
     mHwRotation = atoi(property) / 90;
     property_get("ro.sf.default_rotation", property, "0");
-    mDefaultRotation = atoi(property);    
+    mDefaultRotation = atoi(property);
+
     for (int i=0 ; i<DisplayDevice::NUM_DISPLAY_TYPES ; i++) {
         if (display == mDefaultDisplays[i]) {
             type = i;
@@ -2092,17 +2093,17 @@ status_t SurfaceFlinger::onLayerDestroyed(const wp<LayerBaseClient>& layer)
 // ---------------------------------------------------------------------------
 
 void SurfaceFlinger::onInitializeDisplays() {
-    char value[PROPERTY_VALUE_MAX];   
+    char value[PROPERTY_VALUE_MAX];
     int mDefaultRotation = 0;
-    int mHwRotation = 0;    
+    int mHwRotation = 0;
     sp<const DisplayDevice> hw(getDefaultDisplayDevice());
     const uint32_t hw_w = hw->getWidth();
-    const uint32_t hw_h = hw->getHeight();  
-    
+    const uint32_t hw_h = hw->getHeight();
     property_get("ro.sf.default_rotation", value, "0");
-    mDefaultRotation = atoi(value);    
+    mDefaultRotation = atoi(value);
     property_get("ro.sf.hwrotation", value, "0");
     mHwRotation = atoi(value) / 90;
+
     // reset screen orientation
     Vector<ComposerState> state;
     Vector<DisplayState> displays;
