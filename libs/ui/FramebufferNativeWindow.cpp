@@ -74,8 +74,8 @@ private:
 
 ANativeWindowBuffer* FramebufferNativeWindow::getCurrentBufferAddress()
 {
-    ANativeWindowBuffer* buf;		
-    buf = buffers[mCurrentBufferIndex].get();	
+    ANativeWindowBuffer* buf;
+    buf = buffers[mCurrentBufferIndex].get();
     return buf;
 }
 

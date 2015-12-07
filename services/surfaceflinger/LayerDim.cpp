@@ -71,6 +71,35 @@ void LayerDim::onDraw(const sp<const DisplayDevice>& hw, const Region& clip) con
     }
 }
 
+void LayerDim::setGeometry(
+    const sp<const DisplayDevice>& hw,
+    HWComposer::HWCLayerInterface& layer)
+{
+    LayerBaseClient::setGeometry(hw, layer);
+
+    // enable this layer
+    layer.setSkip(false);
+
+    // blending mode
+    layer.setBlending(HWC_BLENDING_DIM);
+
+    // set dim value
+    const State& s(drawingState());
+
+    layer.setAlpha(s.alpha);
+
+    if (isSecure() && !hw->isSecure()) {
+        layer.setSkip(true);
+    }
+}
+
+void LayerDim::setPerFrameData(const sp<const DisplayDevice>& hw,
+    HWComposer::HWCLayerInterface& layer)
+{
+    LayerBaseClient::setPerFrameData(hw, layer);
+    // leave it as it is for dim layer.
+}
+
 // ---------------------------------------------------------------------------
 
 }; // namespace android
