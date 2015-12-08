@@ -651,6 +651,7 @@ status_t HWComposer::createWorkList(int32_t id, size_t numLayers) {
             disp.framebufferTarget->handle = disp.fbTargetHandle;
             disp.framebufferTarget->transform = 0;
             disp.framebufferTarget->blending = HWC_BLENDING_PREMULT;
+            disp.framebufferTarget->alpha = 0xFF;
             disp.framebufferTarget->sourceCrop = r;
             disp.framebufferTarget->displayFrame = r;
             disp.framebufferTarget->visibleRegionScreen.numRects = 1;
@@ -1120,6 +1121,7 @@ public:
         getLayer()->handle = 0;
         getLayer()->transform = 0;
         getLayer()->blending = HWC_BLENDING_NONE;
+        getLayer()->alpha = 0xFF;
         getLayer()->visibleRegionScreen.numRects = 0;
         getLayer()->visibleRegionScreen.rects = NULL;
     }
@@ -1212,6 +1214,7 @@ public:
         getLayer()->handle = 0;
         getLayer()->transform = 0;
         getLayer()->blending = HWC_BLENDING_NONE;
+        getLayer()->alpha = 0xFF;
         getLayer()->visibleRegionScreen.numRects = 0;
         getLayer()->visibleRegionScreen.rects = NULL;
         getLayer()->acquireFenceFd = -1;
