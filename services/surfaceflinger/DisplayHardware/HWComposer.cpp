@@ -1136,6 +1136,9 @@ public:
     virtual void setBlending(uint32_t blending) {
         getLayer()->blending = blending;
     }
+    virtual void setAlpha(uint32_t alpha) {
+        getLayer()->alpha = alpha;
+    }
     virtual void setTransform(uint32_t transform) {
         getLayer()->transform = transform;
     }
