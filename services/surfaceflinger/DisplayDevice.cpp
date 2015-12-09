@@ -226,7 +226,7 @@ void DisplayDevice::swapBuffers(HWComposer& hwc) const {
         // TODO: HWC 1.2 will allow virtual displays
         if (mType >= DisplayDevice::DISPLAY_VIRTUAL) {
             // always call eglSwapBuffers() for virtual displays
-            //success = eglSwapBuffers(mDisplay, mSurface);
+            success = eglSwapBuffers(mDisplay, mSurface);
         } else if (hwc.supportsFramebufferTarget()) {
             // as of hwc 1.1 we always call eglSwapBuffers if we have some
             // GLES layers

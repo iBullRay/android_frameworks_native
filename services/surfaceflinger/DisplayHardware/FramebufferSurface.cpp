@@ -37,7 +37,7 @@
 #include "DisplayHardware/HWComposer.h"
 
 #ifndef NUM_FRAMEBUFFER_SURFACE_BUFFERS
-#define NUM_FRAMEBUFFER_SURFACE_BUFFERS (4)
+#define NUM_FRAMEBUFFER_SURFACE_BUFFERS (2)
 #endif
 
 // ----------------------------------------------------------------------------

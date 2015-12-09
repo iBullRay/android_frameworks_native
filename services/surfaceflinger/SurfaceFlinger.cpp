@@ -631,10 +631,6 @@ bool SurfaceFlinger::authenticateSurfaceTexture(
 
 status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo* info) {
     int32_t type = BAD_VALUE;
-    int mHwRotation = 0;
-    char property[PROPERTY_VALUE_MAX];
-    property_get("ro.sf.hwrotation", property, "0");
-    mHwRotation = atoi(property) / 90;
 
     for (int i=0 ; i<DisplayDevice::NUM_DISPLAY_TYPES ; i++) {
         if (display == mDefaultDisplays[i]) {
@@ -699,16 +695,21 @@ status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo*
         info->orientation = 0;
     }
 
-    if ((mHwRotation & 0x01) == 0) {
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.sf.hwrotation", value, "0");
+    int additionalRot = atoi(value) / 90;
+    if ((type == DisplayDevice::DISPLAY_PRIMARY) && (additionalRot & DisplayState::eOrientationSwapMask)) {
+        info->h = hwc.getWidth(type);
+        info->w = hwc.getHeight(type);
+        info->xdpi = ydpi;
+        info->ydpi = xdpi;
+    }
+    else {
         info->w = hwc.getWidth(type);
         info->h = hwc.getHeight(type);
-    } else {
-        info->w = hwc.getHeight(type);
-        info->h = hwc.getWidth(type);
+        info->xdpi = xdpi;
+        info->ydpi = ydpi;
     }
-
-    info->xdpi = xdpi;
-    info->ydpi = ydpi;
     info->fps = float(1e9 / hwc.getRefreshPeriod(type));
 
     // All non-virtual displays are currently considered secure.
@@ -2090,34 +2091,15 @@ status_t SurfaceFlinger::onLayerDestroyed(const wp<LayerBaseClient>& layer)
 // ---------------------------------------------------------------------------
 
 void SurfaceFlinger::onInitializeDisplays() {
-    char value[PROPERTY_VALUE_MAX];
-    int mHwRotation = 0;
-    sp<const DisplayDevice> hw(getDefaultDisplayDevice());
-    const uint32_t hw_w = hw->getWidth();
-    const uint32_t hw_h = hw->getHeight();
-    property_get("ro.sf.hwrotation", value, "0");
-    mHwRotation = atoi(value) / 90;
-
     // reset screen orientation
     Vector<ComposerState> state;
     Vector<DisplayState> displays;
     DisplayState d;
     d.what = DisplayState::eDisplayProjectionChanged;
     d.token = mDefaultDisplays[DisplayDevice::DISPLAY_PRIMARY];
-    d.orientation = mHwRotation % 4;
+    d.orientation = DisplayState::eOrientationDefault;
     d.frame.makeInvalid();
     d.viewport.makeInvalid();
-    if ((d.orientation & DisplayState::eOrientation90) != DisplayState::eOrientationDefault) { 	
-        d.frame.right = hw_w;	    
-        d.frame.bottom = hw_h; 	   
-        d.viewport.right = hw_w;	   
-        d.viewport.bottom = hw_h;    
-    } else {
-        d.frame.right = hw_h;
-        d.frame.bottom = hw_w;    
-        d.viewport.right = hw_h;
-        d.viewport.bottom = hw_w;  
-    }
     displays.add(d);
     setTransactionState(state, displays, 0);
     onScreenAcquired(getDefaultDisplayDevice());
@@ -2740,7 +2722,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(const sp<IBinder>& display,
 
     if ((sw > hw_w) || (sh > hw_h)) {
         ALOGE("size mismatch (%d, %d) > (%d, %d)", sw, sh, hw_w, hw_h);
-        //return BAD_VALUE;
+        return BAD_VALUE;
     }
 
     sw = (!sw) ? hw_w : sw;
