@@ -268,6 +268,7 @@ void Layer::setGeometry(
 	
     // we can't do alpha-fade with the hwc HAL
     const State& s(drawingState());
+    layer.setAlpha(s.alpha);
 
     if (s.alpha < 0xFF) {
         layer.setBlending(mPremultipliedAlpha ?
