@@ -2722,7 +2722,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(const sp<IBinder>& display,
 
     if ((sw > hw_w) || (sh > hw_h)) {
         ALOGE("size mismatch (%d, %d) > (%d, %d)", sw, sh, hw_w, hw_h);
-        return BAD_VALUE;
+//        return BAD_VALUE;
     }
 
     sw = (!sw) ? hw_w : sw;

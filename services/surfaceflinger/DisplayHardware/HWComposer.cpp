@@ -282,7 +282,8 @@ HWComposer::HWComposer(
         }
 
         // don't need a vsync thread if we have a hardware composer
-        needVSyncThread = false;
+        // but gs702a requires a vsync
+        needVSyncThread = true;
 
         // always turn vsync off when we start
         if (hwcHasVsyncEvent(mHwc)) {
@@ -1136,9 +1137,6 @@ public:
     virtual void setBlending(uint32_t blending) {
         getLayer()->blending = blending;
     }
-    virtual void setAlpha(uint32_t alpha) {
-        getLayer()->alpha = alpha;
-    }
     virtual void setTransform(uint32_t transform) {
         getLayer()->transform = transform;
     }
@@ -1226,9 +1224,6 @@ public:
     }
     virtual void setBlending(uint32_t blending) {
         getLayer()->blending = blending;
-    }
-    virtual void setAlpha(uint32_t alpha) {
-        getLayer()->alpha = alpha;
     }
     virtual void setTransform(uint32_t transform) {
         getLayer()->transform = transform;
