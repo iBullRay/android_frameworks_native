@@ -93,6 +93,7 @@ DisplayDevice::DisplayDevice(
       mSecureLayerVisible(false),
       mScreenAcquired(false),
       mLayerStack(0),
+      mHardwareOrientation(0),
       mOrientation()
 {
     init(config);
@@ -164,7 +165,12 @@ void DisplayDevice::init(EGLConfig config)
     // was created with createDisplay().
     switch (mType) {
         case DISPLAY_PRIMARY:
+            char value[PROPERTY_VALUE_MAX];
             mDisplayName = "Built-in Screen";
+
+            /* hwrotation applies only to the primary display */
+            property_get("ro.sf.hwrotation", value, "0");
+            mHardwareOrientation = atoi(value);
             break;
         case DISPLAY_EXTERNAL:
             mDisplayName = "HDMI Screen";
@@ -226,7 +232,7 @@ void DisplayDevice::swapBuffers(HWComposer& hwc) const {
         // TODO: HWC 1.2 will allow virtual displays
         if (mType >= DisplayDevice::DISPLAY_VIRTUAL) {
             // always call eglSwapBuffers() for virtual displays
-//            success = eglSwapBuffers(mDisplay, mSurface);
+            // success = eglSwapBuffers(mDisplay, mSurface);
         } else if (hwc.supportsFramebufferTarget()) {
             // as of hwc 1.1 we always call eglSwapBuffers if we have some
             // GLES layers
@@ -351,9 +357,7 @@ status_t DisplayDevice::orientationToTransfrom(
         int orientation, int w, int h, Transform* tr)
 {
     uint32_t flags = 0;
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.sf.hwrotation", value, "0");
-    int additionalRot = atoi(value);
+    int additionalRot = this->getHardwareOrientation();
 
     if (additionalRot) {
         additionalRot /= 90;
@@ -394,6 +398,10 @@ void DisplayDevice::setProjection(int orientation,
     updateGeometryTransform();
 }
 
+int DisplayDevice::getHardwareOrientation() {
+    return mHardwareOrientation;
+}
+
 void DisplayDevice::updateGeometryTransform() {
     int w = mDisplayWidth;
     int h = mDisplayHeight;
@@ -408,7 +416,11 @@ void DisplayDevice::updateGeometryTransform() {
         if (!frame.isValid()) {
             // the destination frame can be invalid if it has never been set,
             // in that case we assume the whole display frame.
-            frame = Rect(w, h);
+            if ((mHardwareOrientation/90) & DisplayState::eOrientationSwapMask) {
+                frame = Rect(h, w);
+            } else {
+                frame = Rect(w, h);
+            }
         }
 
         if (viewport.isEmpty()) {

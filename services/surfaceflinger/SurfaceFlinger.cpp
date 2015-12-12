@@ -695,9 +695,7 @@ status_t SurfaceFlinger::getDisplayInfo(const sp<IBinder>& display, DisplayInfo*
         info->orientation = 0;
     }
 
-    char value[PROPERTY_VALUE_MAX];
-    property_get("ro.sf.hwrotation", value, "0");
-    int additionalRot = atoi(value) / 90;
+    int additionalRot = mDisplays[0]->getHardwareOrientation() / 90;
     if ((type == DisplayDevice::DISPLAY_PRIMARY) && (additionalRot & DisplayState::eOrientationSwapMask)) {
         info->h = hwc.getWidth(type);
         info->w = hwc.getHeight(type);
@@ -2722,7 +2720,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(const sp<IBinder>& display,
 
     if ((sw > hw_w) || (sh > hw_h)) {
         ALOGE("size mismatch (%d, %d) > (%d, %d)", sw, sh, hw_w, hw_h);
-//        return BAD_VALUE;
+        // return BAD_VALUE;
     }
 
     sw = (!sw) ? hw_w : sw;

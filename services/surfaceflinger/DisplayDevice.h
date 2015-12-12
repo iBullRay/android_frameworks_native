@@ -146,6 +146,7 @@ public:
      */
     uint32_t getPageFlipCount() const;
     void dump(String8& result, char* buffer, size_t SIZE) const;
+    int getHardwareOrientation();
     ANativeWindow* getNativeWindow() const { return mNativeWindow.get(); }
 
 private:
@@ -194,12 +195,13 @@ private:
     /*
      * Transaction state
      */
-    static status_t orientationToTransfrom(int orientation,
+    status_t orientationToTransfrom(int orientation,
             int w, int h, Transform* tr);
 
     void updateGeometryTransform();
 
     uint32_t mLayerStack;
+    int mHardwareOrientation;
     int mOrientation;
     Rect mViewport;
     Rect mFrame;
