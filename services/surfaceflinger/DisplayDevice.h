@@ -147,7 +147,7 @@ public:
     uint32_t getPageFlipCount() const;
     void dump(String8& result, char* buffer, size_t SIZE) const;
     int getHardwareOrientation();
-    ANativeWindow* getNativeWindow() const { return mNativeWindow.get(); }
+    ANativeWindow* getNativeWindow()const  { return mNativeWindow.get(); }
 
 private:
     void init(EGLConfig config);

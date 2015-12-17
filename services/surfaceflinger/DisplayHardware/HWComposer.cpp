@@ -282,8 +282,7 @@ HWComposer::HWComposer(
         }
 
         // don't need a vsync thread if we have a hardware composer
-        // but gs702a requires a vsync
-        needVSyncThread = true;
+        needVSyncThread = false;
 
         // always turn vsync off when we start
         if (hwcHasVsyncEvent(mHwc)) {
